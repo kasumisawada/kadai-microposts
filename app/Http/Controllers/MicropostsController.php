@@ -13,23 +13,24 @@ class MicropostsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-
     public function index()
     {
         $data = [];
         if (\Auth::check()) {
             $user = \Auth::user();
-            $microposts = $user->feed_microposts()->orderBy('created_at', 'desc')->paginate(10);
+            $microposts = $user->microposts()->orderBy('created_at', 'desc')->paginate(10);
 
             $data = [
                 'user' => $user,
                 'microposts' => $microposts,
             ];
+            $data += $this->counts($user);
+            return view('users.show', $data);
+        }else {
+            return view('welcome');
         }
-        return view('welcome', $data);
     }
-    
-    public function store(Request $request)
+     public function store(Request $request)
     {
         $this->validate($request, [
             'content' => 'required|max:191',
@@ -41,7 +42,6 @@ class MicropostsController extends Controller
 
         return redirect()->back();
     }
-    
     public function destroy($id)
     {
         $micropost = \App\Micropost::find($id);
@@ -52,5 +52,5 @@ class MicropostsController extends Controller
 
         return redirect()->back();
     }
-
+    
 }
